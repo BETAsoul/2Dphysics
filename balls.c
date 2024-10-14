@@ -15,13 +15,13 @@
 int delTime = 1/FPS;
 
 typedef struct{
-    float posx;
-    float posy;
+    float posX;
+    float posY;
 }position;
 
 typedef struct{
-    float velx;
-    float vely;
+    float velX;
+    float velY;
 }velocity;
 
 //----------Functions----------
@@ -56,9 +56,6 @@ void drawCircle(int radius, SDL_Renderer *rndr, int centerX, int centerY){
     }
 }
 
-//Collision handling
-void collisionHandle(){}
-
 
 //------------MAIN------------
 int main(int argc, char *argv[]){
@@ -71,20 +68,44 @@ int main(int argc, char *argv[]){
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-
-    drawCircle(40, renderer, 400, 300);
-
-    SDL_RenderPresent(renderer);
-
     SDL_Event event;
     int running = 1;
+
+    int radius = 20;
+
+    velocity vel;
+    vel.velX = 2;
+    vel.velY = 3;
+
+    position pos;
+    pos.posX = 400;
+    pos.posY = 300;
+
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = 0;
             }
         }
+        SDL_SetRenderDrawColor(renderer, 255, 155, 0, 255);
+        drawCircle(radius, renderer, pos.posX, pos.posY);
+        SDL_RenderPresent(renderer);
+
+        if(pos.posX - radius <= 0 || pos.posX + radius >= 800){
+            vel.velX = -vel.velX;
+        }
+        if (pos.posY - radius <= 0 || pos.posY + radius >= 600) {
+            vel.velY = -vel.velY;
+        }
+
+        vel.velX = vel.velX + ACC*vel.velX;
+        vel.velY = vel.velY + ACC*vel.velY;
+
+        pos.posX = pos.posX + vel.velX*delTime;
+        pos.posY = pos.posY + vel.velY*delTime;
+
+        SDL_Delay(delTime);
+
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
