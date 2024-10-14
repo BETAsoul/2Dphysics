@@ -8,11 +8,12 @@
 #include <SDL2/SDL_video.h>
 
 //----------CONSTANTS----------
-#define ACC 9
-#define FPS 30
+#define ACC 0.01
+#define FPS 60
+#define MAX_VELOCITY 100
 
 //----------variables----------
-int delTime = 1/FPS;
+float delTime = 1.00/FPS;
 
 typedef struct{
     float posX;
@@ -37,8 +38,8 @@ void drawCircle(int radius, SDL_Renderer *rndr, int centerX, int centerY){
         SDL_RenderDrawPoint(rndr, centerX +x, centerY + y);
         SDL_RenderDrawPoint(rndr, centerX -x, centerY - y);
         SDL_RenderDrawPoint(rndr, centerX -x, centerY + y);
-        SDL_RenderDrawPoint(rndr, centerX +y, centerY + x);
         SDL_RenderDrawPoint(rndr, centerX +y, centerY - x);
+        SDL_RenderDrawPoint(rndr, centerX +y, centerY + x);
         SDL_RenderDrawPoint(rndr, centerX -y, centerY - x);
         SDL_RenderDrawPoint(rndr, centerX -y, centerY + x);
 
@@ -71,15 +72,15 @@ int main(int argc, char *argv[]){
     SDL_Event event;
     int running = 1;
 
-    int radius = 20;
+    int radius = 40;
 
     velocity vel;
-    vel.velX = 2;
-    vel.velY = 3;
+    vel.velX = 70;
+    vel.velY = 85;
 
     position pos;
-    pos.posX = 400;
-    pos.posY = 300;
+    pos.posX = 50;
+    pos.posY = 50;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -87,9 +88,11 @@ int main(int argc, char *argv[]){
                 running = 0;
             }
         }
-        SDL_SetRenderDrawColor(renderer, 255, 155, 0, 255);
-        drawCircle(radius, renderer, pos.posX, pos.posY);
-        SDL_RenderPresent(renderer);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderClear(renderer);
+
+        if(vel.velX>MAX_VELOCITY)vel.velX = MAX_VELOCITY;
+        if(vel.velY>MAX_VELOCITY)vel.velY = MAX_VELOCITY;
 
         if(pos.posX - radius <= 0 || pos.posX + radius >= 800){
             vel.velX = -vel.velX;
@@ -97,14 +100,19 @@ int main(int argc, char *argv[]){
         if (pos.posY - radius <= 0 || pos.posY + radius >= 600) {
             vel.velY = -vel.velY;
         }
-
+       
+        
         vel.velX = vel.velX + ACC*vel.velX;
         vel.velY = vel.velY + ACC*vel.velY;
-
+       
         pos.posX = pos.posX + vel.velX*delTime;
         pos.posY = pos.posY + vel.velY*delTime;
 
-        SDL_Delay(delTime);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0,  255);
+        drawCircle(radius, renderer, pos.posX, pos.posY);
+        SDL_RenderPresent(renderer);
+
+        SDL_Delay(1000/FPS);
 
     }
     SDL_DestroyRenderer(renderer);
